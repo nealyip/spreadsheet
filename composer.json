@@ -1,0 +1,41 @@
+{
+  "name": "nealyip/spreadsheet",
+  "description": "Spreadsheet read writer abstraction for box/spout and phpexcel",
+  "minimum-stability": "stable",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Neal Yip",
+      "email": "neal.yip@webssup.com"
+    }
+  ],
+  "require": {
+    "box/spout": "^2.7",
+    "phpoffice/phpexcel": "^1.8",
+    "illuminate/support": "~5.1.0|~5.2.0|~5.3.0|~5.4.0",
+    "illuminate/config": "~5.1.0|~5.2.0|~5.3.0|~5.4.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^6.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "Nealyip\\Spreadsheet\\": "src"
+    },
+    "files": [
+
+    ]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Nealyip\\Spreadsheet\\Test\\": "tests"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Nealyip\\Spreadsheet\\SpreadsheetServiceProvider"
+      ]
+    }
+  }
+}
