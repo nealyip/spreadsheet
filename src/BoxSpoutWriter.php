@@ -64,7 +64,7 @@ class BoxSpoutWriter implements Writer
 
         $this->_setHeaders($headers);
 
-        foreach ($data as $k => $item) {
+        foreach (array_values($data) as $k => $item) {
             $this->_box->addRow($this->_numberSafeToExcel($item));
         }
 

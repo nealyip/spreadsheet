@@ -65,7 +65,7 @@ class PHPExcelWriter implements Writer
     {
         $beginRow = $this->_beforeWrite($headers);
 
-        foreach ($data as $k => $item) {
+        foreach (array_values($data) as $k => $item) {
             $this->_current->fromArray($this->_numberSafeToExcel($item), null, 'A' . ($k + 1 + $beginRow));
         }
 
