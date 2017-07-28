@@ -23,4 +23,29 @@ interface Reader
      */
     public function read($file, $sheetIndex = 0, $extension = null);
 
+    /**
+     * Read file and convert to key value array
+     *
+     * @param string $file             File name
+     * @param int    $sheetIndex       0
+     * @param bool   $firstColIsHeader Is first header a header column
+     * @param array  $columns          Custom column for the json
+     * @param null   $extension        Force file extension
+     *
+     * @return array
+     */
+    public function toKeyValueArray($file, $sheetIndex = 0, $firstColIsHeader = true, $columns = [], $extension = null);
+
+    /**
+     * Read file and convert to key value json
+     *
+     * @param string $file             File name
+     * @param int    $sheetIndex       0
+     * @param bool   $firstColIsHeader Is first header a header column
+     * @param array  $columns          Custom column for the json
+     * @param null   $extension        Force file extension
+     *
+     * @return mixed
+     */
+    public function toJson($file, $sheetIndex = 0, $firstColIsHeader = true, $columns = [], $extension = null);
 }

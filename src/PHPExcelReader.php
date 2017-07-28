@@ -18,6 +18,8 @@ class PHPExcelReader implements Reader
      */
     protected $_ext;
 
+    use ReaderConvertArrayTrait;
+
     /**
      * @param string $file
      *
@@ -64,5 +66,13 @@ class PHPExcelReader implements Reader
             }
             yield $results;
         }
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function toJson($file, $sheetIndex = 0, $firstColIsHeader = true, $columns = [], $extension = null)
+    {
+        // TODO: Implement toJson() method.
     }
 }

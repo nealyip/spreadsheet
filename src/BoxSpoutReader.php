@@ -26,6 +26,8 @@ class BoxSpoutReader implements Reader
      */
     protected $_readerFactory;
 
+    use ReaderConvertArrayTrait;
+
     public function __construct(ReaderFactory $readerFactory)
     {
 
