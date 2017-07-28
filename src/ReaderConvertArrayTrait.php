@@ -32,7 +32,7 @@ trait ReaderConvertArrayTrait
 
         while ($rows->valid()) {
             $row       = $rows->current();
-            $results[] = array_combine($columns, array_map('strval', array_slice($row, 0, count($columns))));
+            $results[] = array_combine($columns, array_map('strval', array_slice(array_pad($row, count($columns) + 1, null), 0, count($columns))));
             $rows->next();
         }
 

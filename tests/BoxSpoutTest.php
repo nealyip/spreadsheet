@@ -34,11 +34,10 @@ class BoxSpoutTest extends TestCase
                 [
                     'name'   => 'chan tai man',
                     'gender' => 'M',
-                    'tel'    => '98838111'
+                    'tel'    => ''
                 ]
             ], $result
         );
-
 
         $result = $box->toKeyValueArray($this->_datafile, 0, false, ['name', 'gender', 'tel']);
 
@@ -57,7 +56,7 @@ class BoxSpoutTest extends TestCase
                 [
                     'name'   => 'chan tai man',
                     'gender' => 'M',
-                    'tel'    => '98838111'
+                    'tel'    => ''
                 ]
             ], $result
         );

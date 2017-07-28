@@ -32,7 +32,7 @@ class PHPExcelTest extends TestCase
                 [
                     'name'   => 'chan tai man',
                     'gender' => 'M',
-                    'tel'    => '98838111'
+                    'tel'    => ''
                 ]
             ], $result
         );
@@ -54,7 +54,7 @@ class PHPExcelTest extends TestCase
                 [
                     'name'   => 'chan tai man',
                     'gender' => 'M',
-                    'tel'    => '98838111'
+                    'tel'    => ''
                 ]
             ], $result
         );
