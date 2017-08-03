@@ -46,11 +46,8 @@ class PHPExcelWriter implements Writer
      */
     public function write(\Generator $generator, array $headers = [], callable $filter = null)
     {
-        $beginRow = 0;
 
-        if (count($headers)) {
-            $beginRow = $this->_beforeWrite($headers);
-        }
+        $beginRow = $this->_beforeWrite($headers);
 
         foreach ($generator as $k => $item) {
             if (is_callable($filter)) {
@@ -67,11 +64,7 @@ class PHPExcelWriter implements Writer
      */
     public function writeArray(array $data, array $headers = [])
     {
-        $beginRow = 0;
-
-        if (count($headers)) {
-            $beginRow = $this->_beforeWrite($headers);
-        }
+        $beginRow = $this->_beforeWrite($headers);
 
         foreach (array_values($data) as $k => $item) {
             $this->_current->fromArray($this->_numberSafeToExcel($item), null, 'A' . ($k + 1 + $beginRow));
@@ -169,7 +162,9 @@ class PHPExcelWriter implements Writer
 
         $beginRow = $this->_current->getHighestRow();
 
-        $this->_current->fromArray($headers, null, 'A' . $beginRow);
+        if (count($headers)) {
+            $this->_current->fromArray($headers, null, 'A' . $beginRow);
+        }
 
         return $beginRow;
     }
