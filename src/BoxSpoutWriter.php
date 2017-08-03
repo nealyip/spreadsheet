@@ -44,7 +44,9 @@ class BoxSpoutWriter implements Writer
      */
     public function write(\Generator $generator, array $headers = [], callable $filter = null)
     {
-        $this->_setHeaders($headers);
+        if (count($headers)){
+            $this->_setHeaders($headers);
+        }
 
         foreach ($generator as $k => $item) {
             if (is_callable($filter)) {
@@ -62,7 +64,9 @@ class BoxSpoutWriter implements Writer
     public function writeArray(array $data, array $headers = [])
     {
 
-        $this->_setHeaders($headers);
+        if (count($headers)){
+            $this->_setHeaders($headers);
+        }
 
         foreach (array_values($data) as $k => $item) {
             $this->_box->addRow($this->_numberSafeToExcel($item));
