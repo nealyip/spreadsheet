@@ -27,15 +27,21 @@ class PHPExcelWriter implements Writer
     private $_current;
 
     /**
+     * @var bool
+     */
+    protected $_download;
+
+    /**
      * @inheritdoc
      */
-    public function setup($filename)
+    public function setup($filename, $download = true)
     {
         $this->_ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
         if (!in_array($this->_ext, ['csv', 'xlsx', 'xls'])) {
             throw new WriterWrongFileFormatException();
         }
         $this->_filename = $filename;
+        $this->_download = $download;
         $this->_phpExcel = new \PHPExcel();
 
         return $this;
@@ -120,9 +126,13 @@ class PHPExcelWriter implements Writer
     {
         $this->_phpExcel->setActiveSheetIndex(0);
         $writer = $this->_getWriter();
-        header('Content-Disposition: attachment; filename="' . $this->_filename . '"');
-        $writer->save('php://output');
-        exit;
+        if ($this->_download) {
+            header('Content-Disposition: attachment; filename="' . $this->_filename . '"');
+            $writer->save('php://output');
+            exit;
+        } else {
+            $writer->save($this->_filename);
+        }
     }
 
 
@@ -135,13 +145,19 @@ class PHPExcelWriter implements Writer
     {
         switch ($this->_ext) {
             case 'xlsx':
-                header('Content-type: application/vnd.ms-excel');
+                if ($this->_download) {
+                    header('Content-type: application/vnd.ms-excel');
+                }
                 return new \PHPExcel_Writer_Excel2007($this->_phpExcel);
             case 'xls':
-                header('Content-type: application/vnd.ms-excel');
+                if ($this->_download) {
+                    header('Content-type: application/vnd.ms-excel');
+                }
                 return new \PHPExcel_Writer_Excel5($this->_phpExcel);
             default:
-                header('Content-type: text/csv; UTF-8');
+                if ($this->_download) {
+                    header('Content-type: text/csv; UTF-8');
+                }
                 $csv = new \PHPExcel_Writer_CSV($this->_phpExcel);
                 $csv->setUseBOM(true);
                 return $csv;
@@ -154,6 +170,7 @@ class PHPExcelWriter implements Writer
      * @param array $headers
      *
      * @return int
+     * @throws \PHPExcel_Exception
      */
     protected function _beforeWrite($headers)
     {
@@ -173,6 +190,7 @@ class PHPExcelWriter implements Writer
      * After write
      *
      * @return $this
+     * @throws \PHPExcel_Exception
      */
     protected function _afterWrite()
     {

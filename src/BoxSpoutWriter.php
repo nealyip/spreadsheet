@@ -26,7 +26,7 @@ class BoxSpoutWriter implements Writer
     /**
      * @inheritdoc
      */
-    public function setup($filename)
+    public function setup($filename, $download = true)
     {
 
         $this->_ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
@@ -34,7 +34,7 @@ class BoxSpoutWriter implements Writer
             throw new WriterWrongFileFormatException();
         }
         $this->_filename = $filename;
-        $this->_box      = $this->_getWriter($filename);
+        $this->_box      = $this->_getWriter($filename, $download);
 
         return $this;
     }
@@ -44,7 +44,7 @@ class BoxSpoutWriter implements Writer
      */
     public function write(\Generator $generator, array $headers = [], callable $filter = null)
     {
-        if (count($headers)){
+        if (count($headers)) {
             $this->_setHeaders($headers);
         }
 
@@ -64,7 +64,7 @@ class BoxSpoutWriter implements Writer
     public function writeArray(array $data, array $headers = [])
     {
 
-        if (count($headers)){
+        if (count($headers)) {
             $this->_setHeaders($headers);
         }
 
@@ -137,13 +137,22 @@ class BoxSpoutWriter implements Writer
      *
      * @param string $filename
      *
+     * @param bool   $download
+     *
      * @return WriterInterface|AbstractMultiSheetsWriter
+     * @throws \Box\Spout\Common\Exception\IOException
+     * @throws \Box\Spout\Common\Exception\UnsupportedTypeException
      */
-    private function _getWriter($filename)
+    private function _getWriter($filename, $download)
     {
         $ext    = $this->_ext;
         $writer = WriterFactory::create($ext);
-        $writer->openToBrowser($filename);
+        if ($download) {
+            $writer->openToBrowser($filename);
+        } else {
+            $writer->openToFile($filename);
+        }
+
         if ($ext === 'csv') {
             $writer->setShouldAddBOM(true);
         }

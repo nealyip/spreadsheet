@@ -9,10 +9,11 @@ interface Writer
      * Writer constructor.
      *
      * @param string $filename
+     * @param bool   $download
      *
      * @return static
      */
-    public function setup($filename);
+    public function setup($filename, $download = true);
 
     /**
      * Write to buffer
