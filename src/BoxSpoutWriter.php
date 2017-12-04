@@ -24,6 +24,11 @@ class BoxSpoutWriter implements Writer
     private $_filename;
 
     /**
+     * @var bool
+     */
+    protected $_download;
+
+    /**
      * @inheritdoc
      */
     public function setup($filename, $download = true)
@@ -34,6 +39,7 @@ class BoxSpoutWriter implements Writer
             throw new WriterWrongFileFormatException();
         }
         $this->_filename = $filename;
+        $this->_download = $download;
         $this->_box      = $this->_getWriter($filename, $download);
 
         return $this;
@@ -118,7 +124,10 @@ class BoxSpoutWriter implements Writer
     public function save()
     {
         $this->_box->close();
-        exit;
+
+        if ($this->_download) {
+            exit;
+        }
     }
 
 
