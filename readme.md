@@ -59,7 +59,7 @@ class Sth{
         $this->_writer
             ->setup("report.xlsx")
             ->useSheet('Report')
-            ->writeArray([['Tom','M','20'], ['Ann','F','24'], $headers);
+            ->writeArray([['Tom','M','20'], ['Ann','F','24']], $headers);
 
     }
 ```
