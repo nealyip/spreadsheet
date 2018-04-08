@@ -6,6 +6,8 @@ use Box\Spout\Writer\AbstractMultiSheetsWriter;
 use Box\Spout\Writer\WriterFactory;
 use Box\Spout\Writer\WriterInterface;
 
+use \Box\Spout\Common\Exception as BoxException;
+
 class BoxSpoutWriter implements Writer
 {
     /**
@@ -87,16 +89,22 @@ class BoxSpoutWriter implements Writer
     public function useSheet($name = null, $index = 0)
     {
 
-        if ($this->_box instanceof AbstractMultiSheetsWriter) {
+        try {
 
-            $sheet = $this->_box->getSheets()[$index]->setName($name);
+            if ($this->_box instanceof AbstractMultiSheetsWriter) {
 
-            $this->_box->setCurrentSheet($sheet);
+                $sheet = $this->_box->getSheets()[$index]->setName($name);
 
+                $this->_box->setCurrentSheet($sheet);
+
+            }
+
+
+            return $this;
+        } catch (BoxException\SpoutException $e) {
+            throw new GenericException($e);
         }
 
-
-        return $this;
     }
 
     /**
@@ -105,16 +113,19 @@ class BoxSpoutWriter implements Writer
     public function newSheet($name = null)
     {
 
-        if ($this->_box instanceof AbstractMultiSheetsWriter) {
+        try {
+            if ($this->_box instanceof AbstractMultiSheetsWriter) {
 
-            $this->_box->addNewSheetAndMakeItCurrent();
+                $this->_box->addNewSheetAndMakeItCurrent();
 
-            if (!is_null($name)) {
-                $this->_box->getCurrentSheet()->setName($name);
+                if (!is_null($name)) {
+                    $this->_box->getCurrentSheet()->setName($name);
+                }
             }
+            return $this;
+        } catch (BoxException\SpoutException $e) {
+            throw new GenericException($e);
         }
-
-        return $this;
     }
 
 
@@ -149,23 +160,30 @@ class BoxSpoutWriter implements Writer
      * @param bool   $download
      *
      * @return WriterInterface|AbstractMultiSheetsWriter
-     * @throws \Box\Spout\Common\Exception\IOException
-     * @throws \Box\Spout\Common\Exception\UnsupportedTypeException
+     * @throws WriterWrongFileFormatException
+     * @throws GenericException
      */
     private function _getWriter($filename, $download)
     {
-        $ext    = $this->_ext;
-        $writer = WriterFactory::create($ext);
-        if ($download) {
-            $writer->openToBrowser($filename);
-        } else {
-            $writer->openToFile($filename);
-        }
+        $ext = $this->_ext;
+        try {
+            $writer = WriterFactory::create($ext);
 
-        if ($ext === 'csv') {
-            $writer->setShouldAddBOM(true);
+            if ($download) {
+                $writer->openToBrowser($filename);
+            } else {
+                $writer->openToFile($filename);
+            }
+
+            if ($ext === 'csv') {
+                $writer->setShouldAddBOM(true);
+            }
+            return $writer;
+        } catch (BoxException\UnsupportedTypeException $unsupportedTypeException) {
+            throw new WriterWrongFileFormatException();
+        } catch (BoxException\SpoutException $exception) {
+            throw new GenericException($exception);
         }
-        return $writer;
     }
 
     /**

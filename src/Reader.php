@@ -20,6 +20,8 @@ interface Reader
      * @param null   $extension The file extension is auto read by $file, but can be overridden by this parameter
      *
      * @return \Generator
+     * @throws WriterWrongFileFormatException
+     * @throws GenericException
      */
     public function read($file, $sheetIndex = 0, $extension = null);
 

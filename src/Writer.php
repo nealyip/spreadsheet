@@ -12,6 +12,8 @@ interface Writer
      * @param bool   $download
      *
      * @return static
+     * @throws GenericException
+     * @throws WriterWrongFileFormatException
      */
     public function setup($filename, $download = true);
 
@@ -23,6 +25,7 @@ interface Writer
      * @param callable   $filter  Filter that applied to each row
      *
      * @return static
+     * @throws GenericException
      */
     public function write(\Generator $generator, array $headers = [], callable $filter = null);
 
@@ -33,6 +36,7 @@ interface Writer
      * @param array       $headers The 1st row
      *
      * @return static
+     * @throws GenericException
      */
     public function writeArray(array $data, array $headers = []);
 
@@ -43,6 +47,7 @@ interface Writer
      * @param int $index
      *
      * @return static
+     * @throws GenericException
      */
     public function useSheet($name = null, $index = 0);
 
@@ -52,6 +57,7 @@ interface Writer
      * @param string $name
      *
      * @return static
+     * @throws GenericException
      */
     public function newSheet($name = null);
 
@@ -59,6 +65,7 @@ interface Writer
      * Close writer and export to browser
      *
      * @return mixed
+     * @throws GenericException
      */
     public function save();
 }

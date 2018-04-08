@@ -8,10 +8,10 @@
 
 namespace Nealyip\Spreadsheet;
 
-
-use Box\Spout\Reader\CSV\RowIterator;
 use Box\Spout\Reader\CSV\Sheet;
 use Box\Spout\Reader\ReaderFactory;
+
+use Box\Spout\Common\Exception as BoxException;
 
 class BoxSpoutReader implements Reader
 {
@@ -40,6 +40,8 @@ class BoxSpoutReader implements Reader
      *
      * @return \Box\Spout\Reader\ReaderInterface
      * @throws WriterWrongFileFormatException
+     * @throws \Box\Spout\Common\Exception\UnsupportedTypeException
+     * @throws \Box\Spout\Common\Exception\IOException
      */
     protected function _boxSpout($file)
     {
@@ -66,27 +68,32 @@ class BoxSpoutReader implements Reader
             $this->_ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
         }
 
-        $reader = $this->_boxSpout($file);
+        try {
+            $reader = $this->_boxSpout($file);
 
-        $iterator = $reader->getSheetIterator();
+            $iterator = $reader->getSheetIterator();
 
-        switch ($this->_ext) {
-            case 'csv':
-                break;
-            default:
-                while ($sheetIndex-- !== 0) {
-                    $iterator->next();
-                    if (!$iterator->valid()) {
-                        throw new \Exception('Sheet not found');
+            switch ($this->_ext) {
+                case 'csv':
+                    break;
+                default:
+                    while ($sheetIndex-- !== 0) {
+                        $iterator->next();
+                        if (!$iterator->valid()) {
+                            throw new GenericException(new \Exception('Sheet not found'));
+                        }
                     }
-                }
+            }
+
+            /**
+             * @var Sheet $sheet
+             */
+            $iterator->rewind();
+            $sheet = $iterator->current();
+            yield from $sheet->getRowIterator();
+        } catch (BoxException\SpoutException $e) {
+            throw new GenericException($e);
         }
 
-        /**
-         * @var Sheet $sheet
-         */
-        $iterator->rewind();
-        $sheet = $iterator->current();
-        yield from $sheet->getRowIterator();
     }
 }

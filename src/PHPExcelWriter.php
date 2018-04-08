@@ -53,16 +53,20 @@ class PHPExcelWriter implements Writer
     public function write(\Generator $generator, array $headers = [], callable $filter = null)
     {
 
-        $beginRow = $this->_beforeWrite($headers);
+        try {
+            $beginRow = $this->_beforeWrite($headers);
 
-        foreach ($generator as $k => $item) {
-            if (is_callable($filter)) {
-                $filter($item);
+            foreach ($generator as $k => $item) {
+                if (is_callable($filter)) {
+                    $filter($item);
+                }
+                $this->_current->fromArray($this->_numberSafeToExcel($item->toArray()), null, 'A' . ($k + 1 + $beginRow));
             }
-            $this->_current->fromArray($this->_numberSafeToExcel($item->toArray()), null, 'A' . ($k + 1 + $beginRow));
-        }
 
-        return $this->_afterWrite();
+            return $this->_afterWrite();
+        } catch (\PHPExcel_Exception $e) {
+            throw new GenericException($e);
+        }
     }
 
     /**
@@ -70,13 +74,18 @@ class PHPExcelWriter implements Writer
      */
     public function writeArray(array $data, array $headers = [])
     {
-        $beginRow = $this->_beforeWrite($headers);
+        try {
 
-        foreach (array_values($data) as $k => $item) {
-            $this->_current->fromArray($this->_numberSafeToExcel($item), null, 'A' . ($k + 1 + $beginRow));
+            $beginRow = $this->_beforeWrite($headers);
+
+            foreach (array_values($data) as $k => $item) {
+                $this->_current->fromArray($this->_numberSafeToExcel($item), null, 'A' . ($k + 1 + $beginRow));
+            }
+
+            return $this->_afterWrite();
+        } catch (\PHPExcel_Exception $e) {
+            throw new GenericException($e);
         }
-
-        return $this->_afterWrite();
     }
 
     /**
@@ -85,17 +94,21 @@ class PHPExcelWriter implements Writer
     public function useSheet($name = null, $index = 0)
     {
 
-        if (!is_null($name) && $this->_phpExcel->sheetNameExists($name)) {
-            $sheet = $this->_phpExcel->setActiveSheetIndexByName($name);
-        } else {
-            $sheet = $this->_phpExcel->setActiveSheetIndex($this->_ext !== 'csv' ? $index : 0);
-        }
+        try {
+            if (!is_null($name) && $this->_phpExcel->sheetNameExists($name)) {
+                $sheet = $this->_phpExcel->setActiveSheetIndexByName($name);
+            } else {
+                $sheet = $this->_phpExcel->setActiveSheetIndex($this->_ext !== 'csv' ? $index : 0);
+            }
 
-        if (!is_null($name)) {
-            $sheet->setTitle($name);
-        }
+            if (!is_null($name)) {
+                $sheet->setTitle($name);
+            }
 
-        return $this;
+            return $this;
+        } catch (\PHPExcel_Exception $e) {
+            throw new GenericException($e);
+        }
     }
 
     /**
@@ -104,18 +117,22 @@ class PHPExcelWriter implements Writer
     public function newSheet($name = null)
     {
 
-        if ($this->_ext !== 'csv') {
-            $new = $this->_phpExcel->createSheet();
-            $this->_phpExcel->setActiveSheetIndex($this->_phpExcel->getIndex($new));
-        } else {
-            $new = $this->_phpExcel->getActiveSheet();
-        }
+        try {
+            if ($this->_ext !== 'csv') {
+                $new = $this->_phpExcel->createSheet();
+                $this->_phpExcel->setActiveSheetIndex($this->_phpExcel->getIndex($new));
+            } else {
+                $new = $this->_phpExcel->getActiveSheet();
+            }
 
-        if (!is_null($name)) {
-            $new->setTitle($name);
-        }
+            if (!is_null($name)) {
+                $new->setTitle($name);
+            }
 
-        return $this;
+            return $this;
+        } catch (\PHPExcel_Exception $e) {
+            throw new GenericException($e);
+        }
     }
 
 
@@ -124,14 +141,19 @@ class PHPExcelWriter implements Writer
      */
     public function save()
     {
-        $this->_phpExcel->setActiveSheetIndex(0);
-        $writer = $this->_getWriter();
-        if ($this->_download) {
-            header('Content-Disposition: attachment; filename="' . $this->_filename . '"');
-            $writer->save('php://output');
-            exit;
-        } else {
-            $writer->save($this->_filename);
+        try {
+
+            $this->_phpExcel->setActiveSheetIndex(0);
+            $writer = $this->_getWriter();
+            if ($this->_download) {
+                header('Content-Disposition: attachment; filename="' . $this->_filename . '"');
+                $writer->save('php://output');
+                exit;
+            } else {
+                $writer->save($this->_filename);
+            }
+        } catch (\PHPExcel_Exception $e) {
+            throw new GenericException($e);
         }
     }
 

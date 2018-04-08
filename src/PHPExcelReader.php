@@ -25,6 +25,7 @@ class PHPExcelReader implements Reader
      *
      * @return \PHPExcel
      * @throws WriterWrongFileFormatException
+     * @throws \PHPExcel_Reader_Exception
      */
     protected function _phpExcel($file)
     {
@@ -52,19 +53,25 @@ class PHPExcelReader implements Reader
             $this->_ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
         }
 
-        $phpExcel = $this->_phpExcel($file);
 
-        $sheet = $phpExcel->getSheet($sheetIndex);
 
-        foreach ($sheet->getRowIterator() as $iterator) {
-            $results = [];
-            foreach ($iterator->getCellIterator() as $cell) {
-                /**
-                 * @var \PHPExcel_Cell $cell
-                 */
-                $results[] = $cell->getValue();
+        try {
+            $phpExcel = $this->_phpExcel($file);
+
+            $sheet = $phpExcel->getSheet($sheetIndex);
+
+            foreach ($sheet->getRowIterator() as $iterator) {
+                $results = [];
+                foreach ($iterator->getCellIterator() as $cell) {
+                    /**
+                     * @var \PHPExcel_Cell $cell
+                     */
+                    $results[] = $cell->getValue();
+                }
+                yield $results;
             }
-            yield $results;
+        } catch (\PHPExcel_Exception $e) {
+            throw new GenericException($e);
         }
     }
 }
