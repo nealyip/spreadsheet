@@ -60,7 +60,10 @@ class BoxSpoutWriter implements Writer
             if (is_callable($filter)) {
                 $filter($item);
             }
-            $this->_box->addRow($this->_numberSafeToExcel($item->toArray()));
+            if (method_exists($item, 'toArray')){
+                $item = $item->toArray();
+            }
+            $this->_box->addRow($this->_numberSafeToExcel($item));
         }
 
         return $this;
@@ -128,6 +131,16 @@ class BoxSpoutWriter implements Writer
         }
     }
 
+    /**
+     * Not support this action on BoxSpout Writer
+     *
+     * @inheritDoc
+     */
+    public function mergeCells(array $cellLists = [])
+    {
+        return $this;
+    }
+
 
     /**
      * @inheritDoc
@@ -149,7 +162,12 @@ class BoxSpoutWriter implements Writer
      */
     private function _setHeaders($headers)
     {
-        $this->_box->addRow($headers);
+        if (!is_array($headers[0])) {
+            $headers = [$headers];
+        }
+        foreach ($headers as $row) {
+            $this->_box->addRow($row);
+        }
     }
 
     /**

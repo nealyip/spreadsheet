@@ -60,7 +60,10 @@ class PHPExcelWriter implements Writer
                 if (is_callable($filter)) {
                     $filter($item);
                 }
-                $this->_current->fromArray($this->_numberSafeToExcel($item->toArray()), null, 'A' . ($k + 1 + $beginRow));
+                if (method_exists($item, 'toArray')) {
+                    $item = $item->toArray();
+                }
+                $this->_current->fromArray($this->_numberSafeToExcel($item), null, 'A' . ($k + 1 + $beginRow));
             }
 
             return $this->_afterWrite();
@@ -135,6 +138,25 @@ class PHPExcelWriter implements Writer
         }
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function mergeCells(array $cellLists = [])
+    {
+        try {
+            if ($this->_ext !== 'csv') {
+                $current = $this->_phpExcel->getActiveSheet();
+
+                foreach ($cellLists as $cell) {
+                    $current->mergeCells($cell);
+                }
+            }
+            return $this;
+        } catch (\PHPExcel_Exception $e) {
+            throw new GenericException($e);
+        }
+    }
+
 
     /**
      * @inheritDoc
@@ -199,10 +221,15 @@ class PHPExcelWriter implements Writer
 
         $this->_current = $this->_phpExcel->getActiveSheet();
 
-        $beginRow = $this->_current->getHighestRow();
+        $beginRow = $this->_current->getHighestRow() - 1;
 
         if (count($headers)) {
-            $this->_current->fromArray($headers, null, 'A' . $beginRow);
+            if (!is_array($headers[0])) {
+                $headers = [$headers];
+            }
+            foreach ($headers as $row) {
+                $this->_current->fromArray($row, null, 'A' . ++$beginRow);
+            }
         }
 
         return $beginRow;
