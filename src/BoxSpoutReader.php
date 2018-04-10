@@ -90,6 +90,10 @@ class BoxSpoutReader implements Reader
              */
             $iterator->rewind();
             $sheet = $iterator->current();
+            /**
+             * @todo this yield a iterator instead of a generator, allows rewind,
+             *       but phpexcel implementation yield a generator, this should be changed to foreach yield instead
+             */
             yield from $sheet->getRowIterator();
         } catch (BoxException\SpoutException $e) {
             throw new GenericException($e);
