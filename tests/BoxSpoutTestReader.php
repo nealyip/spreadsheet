@@ -12,7 +12,7 @@ use Box\Spout\Reader\ReaderFactory;
 use Nealyip\Spreadsheet\BoxSpoutReader;
 use Nealyip\Spreadsheet\PHPExcelReader;
 
-class BoxSpoutTest extends TestCase
+class BoxSpoutTestReader extends TestCase
 {
 
     protected $_datafile = __DIR__ . DIRECTORY_SEPARATOR . 'resources' . DIRECTORY_SEPARATOR . 'testdata.xlsx';

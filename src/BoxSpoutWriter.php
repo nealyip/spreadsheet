@@ -160,9 +160,10 @@ class BoxSpoutWriter implements Writer
      *
      * @param array $headers
      */
-    private function _setHeaders($headers)
+    protected function _setHeaders($headers)
     {
-        if (!is_array($headers[0])) {
+        reset($headers);
+        if (!is_array(current($headers))) {
             $headers = [$headers];
         }
         foreach ($headers as $row) {

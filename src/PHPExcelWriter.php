@@ -224,7 +224,8 @@ class PHPExcelWriter implements Writer
         $beginRow = $this->_current->getHighestRow() - 1;
 
         if (count($headers)) {
-            if (!is_array($headers[0])) {
+            reset($headers);
+            if (!is_array(current($headers))) {
                 $headers = [$headers];
             }
             foreach ($headers as $row) {
