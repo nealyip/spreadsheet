@@ -218,6 +218,8 @@ class BoxSpoutWriter implements Writer
         foreach ($data as &$d) {
             if (is_numeric($d) && strlen((string)$d) > 11) {
                 $d .= "\t";
+            } else if (is_numeric($d) && is_string($d)) {
+                $d = floatval($d);
             }
         }
         unset($d);
