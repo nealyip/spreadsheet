@@ -59,9 +59,83 @@ class Sth{
         $this->_writer
             ->setup("report.xlsx")
             ->useSheet('Report')
-            ->writeArray([['Tom','M','20'], ['Ann','F','24']], $headers);
+            ->writeArray([['Tom','M','20'], ['Ann','F','24']], $headers)
+            ->save();
 
     }
+```
+
+### Writer using generator ###
+```php
+use Nealyip\Spreadsheet\Writer;
+class Sth{
+    protected $_writer;
+
+    public function __construct(Writer $writer) {
+        $this->_writer = $writer;
+    }
+    
+    /**    
+     * Data source from DB/API etc
+     * 
+     * @return \Generator
+     */
+    protected function _data(){
+        $data = [['Tom','M','20'], ['Ann','F','24']];
+        foreach ($data as $d) {
+            yield $d;
+        }
+    }
+
+
+    public function writeFile($filename){
+
+        $headers = ['Name', 'Gender', 'Age'];
+
+        $this->_writer
+            ->setup("report.xlsx")
+            ->useSheet('Report')
+            ->write($this->_data(), $headers)
+            ->save();
+    }
+
+```
+
+### Write to local file ###
+```php
+
+use Nealyip\Spreadsheet\Writer;
+class Sth{
+    protected $_writer;
+
+    public function __construct(Writer $writer) {
+        $this->_writer = $writer;
+    }
+    
+    /**    
+     * Data source from DB/API etc
+     * 
+     * @return \Generator
+     */
+    protected function _data(){
+        $data = [['Tom','M','20'], ['Ann','F','24']];
+        foreach ($data as $d) {
+            yield $d;
+        }
+    }
+
+
+    public function writeFile($filename){
+
+        $headers = ['Name', 'Gender', 'Age'];
+
+        $this->_writer
+            ->setup("report.xlsx", false)
+            ->useSheet('Report')
+            ->write($this->_data(), $headers)
+            ->save();
+    }
+
 ```
 
 

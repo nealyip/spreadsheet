@@ -9,7 +9,7 @@
 namespace Nealyip\Spreadsheet;
 
 
-class WriterWrongFileFormatException extends \Exception
+class WriterWrongFileFormatException extends GenericException
 {
 
     public function __construct($message = '')
