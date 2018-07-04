@@ -2,6 +2,7 @@
 Spreadsheet read writer abstraction for box/spout and phpexcel, support Laravel
 
 ## Updates ##
+v1.1.2 Fix header for downloading xlsx, throw generic exception on boxspout write function  
 v1.1.0 Add PHPSpreadsheet. PHPExcel was deprecated. Allow use of class with namespace for SPREADSHEET_WRITER and SPREADSHEET_READER from .env
 
 ## Installation ##
