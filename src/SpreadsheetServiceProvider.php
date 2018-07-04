@@ -36,11 +36,23 @@ class SpreadsheetServiceProvider extends ServiceProvider
     {
 
         $this->app->bind(Writer::class, function ($app) {
-            return resolve('Nealyip\\Spreadsheet\\' . config('spreadsheet.writer') . 'Writer');
+
+            $default = config('spreadsheet.writer');
+            $use = 'Nealyip\\Spreadsheet\\' .$default . 'Writer';
+            if (!class_exists($use)) {
+                $use = $default;
+            }
+            return resolve($use);
         });
 
         $this->app->bind(Reader::class, function ($app) {
-            return resolve('Nealyip\\Spreadsheet\\' . config('spreadsheet.reader') . 'Reader');
+
+            $default = config('spreadsheet.reader');
+            $use     = 'Nealyip\\Spreadsheet\\' . $default . 'Reader';
+            if (!class_exists($use)) {
+                $use = $default;
+            }
+            return resolve($use);
         });
 
     }

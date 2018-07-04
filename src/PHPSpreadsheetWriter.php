@@ -1,14 +1,20 @@
 <?php
+/**
+ * Created by PhpStorm.
+ * User: neal.yip
+ * Date: 4/7/2018
+ * Time: 11:22
+ */
 
 namespace Nealyip\Spreadsheet;
 
-/**
- * Class PHPExcelWriter
- *
- * @package Nealyip\Spreadsheet
- * @deprecated since v1.1.0 Use PHPSpreadsheet instead
- */
-class PHPExcelWriter implements Writer
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Writer\Xls;
+use PhpOffice\PhpSpreadsheet\Writer\Csv;
+
+
+class PHPSpreadsheetWriter implements Writer
 {
 
     /**
@@ -17,9 +23,9 @@ class PHPExcelWriter implements Writer
     private $_filename;
 
     /**
-     * @var \PHPExcel
+     * @var Spreadsheet
      */
-    private $_phpExcel;
+    private $_spreadsheet;
 
     /**
      * @var string
@@ -37,7 +43,14 @@ class PHPExcelWriter implements Writer
     protected $_download;
 
     /**
-     * @inheritdoc
+     * Writer constructor.
+     *
+     * @param string $filename
+     * @param bool   $download
+     *
+     * @return static
+     * @throws GenericException
+     * @throws WriterWrongFileFormatException
      */
     public function setup($filename, $download = true)
     {
@@ -45,19 +58,27 @@ class PHPExcelWriter implements Writer
         if (!in_array($this->_ext, ['csv', 'xlsx', 'xls'])) {
             throw new WriterWrongFileFormatException();
         }
-        $this->_filename = $filename;
-        $this->_download = $download;
-        $this->_phpExcel = new \PHPExcel();
+
+        $this->_filename    = $filename;
+        $this->_download    = $download;
+        $this->_spreadsheet = new Spreadsheet();
 
         return $this;
     }
 
     /**
-     * @inheritdoc
+     * Write to buffer
+     *
+     * @param \Generator $generator
+     * @param array      $headers The 1st row. If a 2D array is given, it will be used as multi-line headers
+     * @param callable   $filter  Filter that applied to each row
+     *
+     * @return static
+     * @throws GenericException
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
      */
     public function write(\Generator $generator, array $headers = [], callable $filter = null)
     {
-
         try {
             $beginRow = $this->_beforeWrite($headers);
 
@@ -78,7 +99,14 @@ class PHPExcelWriter implements Writer
     }
 
     /**
-     * @inheritDoc
+     * Write array to buffer
+     *
+     * @param array $data
+     * @param array $headers The 1st row. If a 2D array is given, it will be used as multi-line headers
+     *
+     * @return static
+     * @throws GenericException
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
      */
     public function writeArray(array $data, array $headers = [])
     {
@@ -97,16 +125,21 @@ class PHPExcelWriter implements Writer
     }
 
     /**
-     * @inheritDoc
+     * Use this sheet
+     *
+     * @param string $name
+     * @param int    $index
+     *
+     * @return static
+     * @throws GenericException
      */
     public function useSheet($name = null, $index = 0)
     {
-
         try {
-            if (!is_null($name) && $this->_phpExcel->sheetNameExists($name)) {
-                $sheet = $this->_phpExcel->setActiveSheetIndexByName($name);
+            if (!is_null($name) && $this->_spreadsheet->sheetNameExists($name)) {
+                $sheet = $this->_spreadsheet->setActiveSheetIndexByName($name);
             } else {
-                $sheet = $this->_phpExcel->setActiveSheetIndex($this->_ext !== 'csv' ? $index : 0);
+                $sheet = $this->_spreadsheet->setActiveSheetIndex($this->_ext !== 'csv' ? $index : 0);
             }
 
             if (!is_null($name)) {
@@ -114,23 +147,28 @@ class PHPExcelWriter implements Writer
             }
 
             return $this;
-        } catch (\PHPExcel_Exception $e) {
+        } catch (\PhpOffice\PhpSpreadsheet\Exception $e) {
             throw new GenericException($e);
         }
     }
 
     /**
-     * @inheritDoc
+     * Create a new sheet and use
+     *
+     * @param string $name
+     *
+     * @return static
+     * @throws GenericException
      */
     public function newSheet($name = null)
     {
 
         try {
             if ($this->_ext !== 'csv') {
-                $new = $this->_phpExcel->createSheet();
-                $this->_phpExcel->setActiveSheetIndex($this->_phpExcel->getIndex($new));
+                $new = $this->_spreadsheet->createSheet();
+                $this->_spreadsheet->setActiveSheetIndex($this->_spreadsheet->getIndex($new));
             } else {
-                $new = $this->_phpExcel->getActiveSheet();
+                $new = $this->_spreadsheet->getActiveSheet();
             }
 
             if (!is_null($name)) {
@@ -138,39 +176,46 @@ class PHPExcelWriter implements Writer
             }
 
             return $this;
-        } catch (\PHPExcel_Exception $e) {
+        } catch (\PhpOffice\PhpSpreadsheet\Exception $e) {
             throw new GenericException($e);
         }
     }
 
     /**
-     * @inheritDoc
+     * Only PHPExcel writer support this action
+     * Xlsx only
+     *
+     * @param array $cellLists eg, ['C1:D1', 'E1:F1']
+     *
+     * @return static
+     * @throws GenericException
      */
     public function mergeCells(array $cellLists = [])
     {
         try {
             if ($this->_ext !== 'csv') {
-                $current = $this->_phpExcel->getActiveSheet();
+                $current = $this->_spreadsheet->getActiveSheet();
 
                 foreach ($cellLists as $cell) {
                     $current->mergeCells($cell);
                 }
             }
             return $this;
-        } catch (\PHPExcel_Exception $e) {
+        } catch (\PhpOffice\PhpSpreadsheet\Exception $e) {
             throw new GenericException($e);
         }
     }
 
 
     /**
-     * @inheritDoc
+     * @inheritdoc
      */
     public function save()
     {
+
         try {
 
-            $this->_phpExcel->setActiveSheetIndex(0);
+            $this->_spreadsheet->setActiveSheetIndex(0);
             $writer = $this->_getWriter();
             if ($this->_download) {
                 header('Content-Disposition: attachment; filename="' . $this->_filename . '"');
@@ -179,82 +224,9 @@ class PHPExcelWriter implements Writer
             } else {
                 $writer->save($this->_filename);
             }
-        } catch (\PHPExcel_Exception $e) {
+        } catch (\PhpOffice\PhpSpreadsheet\Exception $e) {
             throw new GenericException($e);
         }
-    }
-
-
-    /**
-     * Get writer
-     *
-     * @return \PHPExcel_Writer_CSV|\PHPExcel_Writer_Excel2007|\PHPExcel_Writer_Excel5
-     */
-    private function _getWriter()
-    {
-        switch ($this->_ext) {
-            case 'xlsx':
-                if ($this->_download) {
-                    header('Content-type: application/vnd.ms-excel');
-                }
-                return new \PHPExcel_Writer_Excel2007($this->_phpExcel);
-            case 'xls':
-                if ($this->_download) {
-                    header('Content-type: application/vnd.ms-excel');
-                }
-                return new \PHPExcel_Writer_Excel5($this->_phpExcel);
-            default:
-                if ($this->_download) {
-                    header('Content-type: text/csv; UTF-8');
-                }
-                $csv = new \PHPExcel_Writer_CSV($this->_phpExcel);
-                $csv->setUseBOM(true);
-                return $csv;
-        }
-    }
-
-    /**
-     * Before write
-     *
-     * @param array $headers
-     *
-     * @return int
-     * @throws \PHPExcel_Exception
-     */
-    protected function _beforeWrite($headers)
-    {
-
-        $this->_current = $this->_phpExcel->getActiveSheet();
-
-        $beginRow = $this->_current->getHighestRow() - 1;
-
-        if (count($headers)) {
-            reset($headers);
-            if (!is_array(current($headers))) {
-                $headers = [$headers];
-            }
-            foreach ($headers as $row) {
-                $this->_current->fromArray($row, null, 'A' . ++$beginRow);
-            }
-        }
-
-        return $beginRow;
-    }
-
-    /**
-     * After write
-     *
-     * @return $this
-     * @throws \PHPExcel_Exception
-     */
-    protected function _afterWrite()
-    {
-        for ($i = 'A'; $i != $this->_current->getHighestColumn(); $i++) {
-            $this->_current->getColumnDimension($i)->setAutoSize(true);
-        }
-        $this->_current->insertNewRowBefore($this->_current->getHighestRow() + 1, 1);
-
-        return $this;
     }
 
     /**
@@ -275,5 +247,76 @@ class PHPExcelWriter implements Writer
         unset($d);
 //        }
         return $data;
+    }
+
+
+    /**
+     * @return Csv|Xls|Xlsx
+     */
+    private function _getWriter()
+    {
+        switch ($this->_ext) {
+            case 'xlsx':
+                if ($this->_download) {
+                    header('Content-type: application/vnd.ms-excel');
+                }
+                return new Xlsx($this->_spreadsheet);
+            case 'xls':
+                if ($this->_download) {
+                    header('Content-type: application/vnd.ms-excel');
+                }
+                return new Xls($this->_spreadsheet);
+            default:
+                if ($this->_download) {
+                    header('Content-type: text/csv; UTF-8');
+                }
+                $csv = new Csv($this->_spreadsheet);
+                $csv->setUseBOM(true);
+                return $csv;
+        }
+    }
+
+    /**
+     * @param $headers
+     *
+     * @return int
+     * @throws \PHPExcel_Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     */
+    protected function _beforeWrite($headers)
+    {
+
+        $this->_current = $this->_spreadsheet->getActiveSheet();
+
+        $beginRow = $this->_current->getHighestRow() - 1;
+
+        if (count($headers)) {
+            reset($headers);
+            if (!is_array(current($headers))) {
+                $headers = [$headers];
+            }
+            foreach ($headers as $row) {
+                $this->_current->fromArray($row, null, 'A' . ++$beginRow);
+            }
+        }
+
+        return $beginRow;
+    }
+
+
+    /**
+     * After write
+     *
+     * @return $this
+     * @throws \PHPExcel_Exception
+     */
+    protected function _afterWrite()
+    {
+        for ($i = 'A'; $i != $this->_current->getHighestColumn(); $i++) {
+            $this->_current->getColumnDimension($i)->setAutoSize(true);
+        }
+        $this->_current->insertNewRowBefore($this->_current->getHighestRow() + 1, 1);
+
+        return $this;
     }
 }

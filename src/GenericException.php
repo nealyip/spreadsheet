@@ -14,23 +14,16 @@ use Throwable;
 class GenericException extends \Exception
 {
 
-    /**
-     * @var Throwable
-     */
-    protected $_exception;
-
     public function __construct(Throwable $previous = null)
     {
 
         parent::__construct($previous->getMessage(), $previous->getCode(), $previous);
-
-        $this->_exception = $previous;
     }
 
     /**
      * @return Throwable
      */
     public function previous(){
-        return $this->_exception;
+        return $this->getPrevious();
     }
 }

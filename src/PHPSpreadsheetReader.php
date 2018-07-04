@@ -8,15 +8,10 @@
 
 namespace Nealyip\Spreadsheet;
 
-use PHPExcel_IOFactory;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
-/**
- * Class PHPExcelReader
- *
- * @package Nealyip\Spreadsheet
- * @deprecated since v1.1.0 Use PHPSpreadsheet instead
- */
-class PHPExcelReader implements Reader
+class PHPSpreadsheetReader implements Reader
 {
 
     /**
@@ -29,20 +24,20 @@ class PHPExcelReader implements Reader
     /**
      * @param string $file
      *
-     * @return \PHPExcel
+     * @return Spreadsheet
      * @throws WriterWrongFileFormatException
-     * @throws \PHPExcel_Reader_Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Reader\Exception
      */
-    protected function _phpExcel($file)
+    protected function _phpSpreadsheet($file)
     {
 
         if (!in_array($this->_ext, ['csv', 'xlsx', 'xls'])) {
             throw new WriterWrongFileFormatException();
         }
 
-        $type = PHPExcel_IOFactory::identify($file);
+        $type = IOFactory::identify($file);
 
-        $reader = PHPExcel_IOFactory::createReader($type);
+        $reader = IOFactory::createReader($type);
 
         return $reader->load($file);
     }
@@ -62,21 +57,21 @@ class PHPExcelReader implements Reader
 
 
         try {
-            $phpExcel = $this->_phpExcel($file);
+            $phpSpreadsheet = $this->_phpSpreadsheet($file);
 
-            $sheet = $phpExcel->getSheet($sheetIndex);
+            $sheet = $phpSpreadsheet->getSheet($sheetIndex);
 
             foreach ($sheet->getRowIterator() as $iterator) {
                 $results = [];
                 foreach ($iterator->getCellIterator() as $cell) {
                     /**
-                     * @var \PHPExcel_Cell $cell
+                     * @var \PhpOffice\PhpSpreadsheet\Cell\Cell $cell
                      */
                     $results[] = $cell->getValue();
                 }
                 yield $results;
             }
-        } catch (\PHPExcel_Exception $e) {
+        } catch (\PhpOffice\PhpSpreadsheet\Exception $e) {
             throw new GenericException($e);
         }
     }
