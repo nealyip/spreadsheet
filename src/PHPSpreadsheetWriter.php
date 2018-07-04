@@ -9,6 +9,7 @@
 namespace Nealyip\Spreadsheet;
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Writer\Xls;
 use PhpOffice\PhpSpreadsheet\Writer\Csv;
@@ -33,7 +34,7 @@ class PHPSpreadsheetWriter implements Writer
     private $_ext;
 
     /**
-     * @var \PHPExcel_Worksheet
+     * @var Worksheet
      */
     private $_current;
 
@@ -280,7 +281,6 @@ class PHPSpreadsheetWriter implements Writer
      * @param $headers
      *
      * @return int
-     * @throws \PHPExcel_Exception
      * @throws \PhpOffice\PhpSpreadsheet\Exception
      */
     protected function _beforeWrite($headers)
@@ -308,7 +308,7 @@ class PHPSpreadsheetWriter implements Writer
      * After write
      *
      * @return $this
-     * @throws \PHPExcel_Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
      */
     protected function _afterWrite()
     {
