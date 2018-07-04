@@ -259,7 +259,7 @@ class PHPSpreadsheetWriter implements Writer
         switch ($this->_ext) {
             case 'xlsx':
                 if ($this->_download) {
-                    header('Content-type: application/vnd.ms-excel');
+                    header('Content-type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
                 }
                 return new Xlsx($this->_spreadsheet);
             case 'xls':

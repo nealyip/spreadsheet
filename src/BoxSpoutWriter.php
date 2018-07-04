@@ -2,6 +2,7 @@
 
 namespace Nealyip\Spreadsheet;
 
+use Box\Spout\Common\Exception\SpoutException;
 use Box\Spout\Writer\AbstractMultiSheetsWriter;
 use Box\Spout\Writer\WriterFactory;
 use Box\Spout\Writer\WriterInterface;
@@ -52,21 +53,26 @@ class BoxSpoutWriter implements Writer
      */
     public function write(\Generator $generator, array $headers = [], callable $filter = null)
     {
-        if (count($headers)) {
-            $this->_setHeaders($headers);
-        }
+        try {
 
-        foreach ($generator as $k => $item) {
-            if (is_callable($filter)) {
-                $filter($item);
+            if (count($headers)) {
+                $this->_setHeaders($headers);
             }
-            if (method_exists($item, 'toArray')){
-                $item = $item->toArray();
-            }
-            $this->_box->addRow($this->_numberSafeToExcel($item));
-        }
 
-        return $this;
+            foreach ($generator as $k => $item) {
+                if (is_callable($filter)) {
+                    $filter($item);
+                }
+                if (method_exists($item, 'toArray')){
+                    $item = $item->toArray();
+                }
+                $this->_box->addRow($this->_numberSafeToExcel($item));
+            }
+
+            return $this;
+        } catch (SpoutException $e) {
+            throw new GenericException($e);
+        }
     }
 
     /**
@@ -75,15 +81,20 @@ class BoxSpoutWriter implements Writer
     public function writeArray(array $data, array $headers = [])
     {
 
-        if (count($headers)) {
-            $this->_setHeaders($headers);
-        }
+        try {
 
-        foreach (array_values($data) as $k => $item) {
-            $this->_box->addRow($this->_numberSafeToExcel($item));
-        }
+            if (count($headers)) {
+                $this->_setHeaders($headers);
+            }
 
-        return $this;
+            foreach (array_values($data) as $k => $item) {
+                $this->_box->addRow($this->_numberSafeToExcel($item));
+            }
+
+            return $this;
+        } catch (SpoutException $e) {
+            throw new GenericException($e);
+        }
     }
 
     /**
@@ -159,6 +170,10 @@ class BoxSpoutWriter implements Writer
      * Set the 1st row
      *
      * @param array $headers
+     *
+     * @throws BoxException\IOException
+     * @throws BoxException\SpoutException
+     * @throws \Box\Spout\Writer\Exception\WriterNotOpenedException
      */
     protected function _setHeaders($headers)
     {

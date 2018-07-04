@@ -195,7 +195,7 @@ class PHPExcelWriter implements Writer
         switch ($this->_ext) {
             case 'xlsx':
                 if ($this->_download) {
-                    header('Content-type: application/vnd.ms-excel');
+                    header('Content-type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
                 }
                 return new \PHPExcel_Writer_Excel2007($this->_phpExcel);
             case 'xls':
